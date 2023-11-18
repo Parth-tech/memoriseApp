@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  MemorizeGameView.swift
 //  memorize
 //
 //  Created by Parth Rasu Jangid on 11/12/23.
@@ -7,9 +7,10 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    let emojis: [String] = ["🥳", "🥰", "🤕", "👽", "🧑🏼‍💻", "👰🏾", "🧎🏼‍♀️", "🐟", "🦔"]
-    @State var currCount: Int = 4
+struct MemorizeGameView: View {
+  
+  @ObservedObject var memorizeGameViewModel : MemorizeGameViewModel
+  @State var currCount : Int = 4
     var body: some View {
       VStack{
         
@@ -17,7 +18,10 @@ struct ContentView: View {
           cards
         }
         Spacer()
-        cardCountAdjuster
+//        cardCountAdjuster
+        Button ("shuffle"){
+          memorizeGameViewModel.shuffle()
+        }
         
       }
         .padding()
@@ -34,10 +38,11 @@ struct ContentView: View {
   var cards : some View  {
     HStack {
       
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100)),GridItem(.adaptive(minimum: 100))]){
-          ForEach(0..<currCount, id: \.self){ index in
-            CardView(isFaceUp: true, cardContent: emojis[index])
+      LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 0)], spacing : 0){
+          ForEach(memorizeGameViewModel.cards.indices, id: \.self){ index in
+            CardView(memorizeGameViewModel.cards[index])
               .aspectRatio(2/3,contentMode: .fit)
+              .padding(5)
           }
         }
       
@@ -52,7 +57,7 @@ struct ContentView: View {
       }) {
           Label(text, systemImage: image)
       }
-      .disabled(currCount + offset < 1 || currCount + offset > emojis.count )
+      .disabled(currCount + offset < 1 || currCount + offset > memorizeGameViewModel.cards.count )
     }
   
     var cardAdder : some View {
@@ -68,21 +73,20 @@ struct ContentView: View {
       if currCount < 1 {
         currCount = 1
       }
-      else if currCount > emojis.count {
-        currCount = emojis.count
+      else if currCount > memorizeGameViewModel.cards.count {
+        currCount = memorizeGameViewModel.cards.count
       }
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
 
 struct CardView: View{
-  @State var isFaceUp = false
-  var cardContent: String = ""
+  
+  var card : MemoryGameModel<String>.Card
+  
+  init(_ card: MemoryGameModel<String>.Card) {
+    self.card = card
+  }
   
   var body: some View{
     ZStack{
@@ -91,14 +95,21 @@ struct CardView: View{
       Group  {
         base.fill(.white)
         base.strokeBorder(lineWidth: 2)
-        Text(cardContent).font(.largeTitle)
-      }.opacity(isFaceUp ? 1 : 0)
+        Text(card.content)
+          .font(.system(size:150))
+          .minimumScaleFactor(0.01)
+          .aspectRatio(1,contentMode: .fit)
+      }.opacity(card.isFaceUp ? 1 : 0)
       
-      base.fill().opacity(isFaceUp ? 0 : 1)
+      base.fill().opacity(card.isFaceUp ? 0 : 1)
       
     }
-    .onTapGesture {
-      isFaceUp = !isFaceUp
-    }
+    
   }
+}
+
+struct MemorizeGameView_Previews: PreviewProvider {
+    static var previews: some View {
+      MemorizeGameView(memorizeGameViewModel:MemorizeGameViewModel())
+    }
 }

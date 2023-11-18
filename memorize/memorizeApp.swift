@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct memorizeApp: App {
+  
+  @StateObject var memorizeGameViewModel = MemorizeGameViewModel()
     var body: some Scene {
         WindowGroup {
-            ContentView()
+          MemorizeGameView(memorizeGameViewModel: memorizeGameViewModel)
         }
     }
 }
