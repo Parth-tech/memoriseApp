@@ -16,6 +16,7 @@ struct MemorizeGameView: View {
         
         ScrollView {
           cards
+            .animation(.default, value: memorizeGameViewModel.cards)
         }
         Spacer()
 //        cardCountAdjuster
@@ -39,10 +40,13 @@ struct MemorizeGameView: View {
     HStack {
       
       LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 0)], spacing : 0){
-          ForEach(memorizeGameViewModel.cards.indices, id: \.self){ index in
-            CardView(memorizeGameViewModel.cards[index])
+          ForEach(memorizeGameViewModel.cards){ card in
+            CardView(card)
               .aspectRatio(2/3,contentMode: .fit)
               .padding(5)
+              .onTapGesture {
+                memorizeGameViewModel.choose(card)
+              }
           }
         }
       
@@ -104,6 +108,7 @@ struct CardView: View{
       base.fill().opacity(card.isFaceUp ? 0 : 1)
       
     }
+    .opacity(card.isMatches ? 0 : 1)
     
   }
 }
